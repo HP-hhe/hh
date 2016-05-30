@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+       
+    <!--指定需要被扫描的类包-->    
+	<context:component-scan base-package="util"/>    
+	<context:component-scan base-package="action"/>
+	<context:component-scan base-package="dao"/>
+	
+	 <!--   配置数据源，DataSource内部封装了一个连接池,当你获取DataSource的时候,
+			它已经敲敲的与数据库建立了多个Connection,并将这些Connection放入了连接池,
+			此时调用DataSource.getConnection()它从连接池里取一个Connection返回,
+			Connection使用完后被close,但这个close并不是真正的与数据库断开连接,
+			而是告诉连接池"我"已经被使用完,"你"可以把我分配给其它"人"使用了.
+			就这样连接池里的Connection被循环利用,避免了每次获取Connection时重新去连接数据库-->
+			
+	 <!--c3p0是一个开源的JDBC连接池,通过spring建立C3P0到数据库的连接。-->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="com.mysql.jdbc.Driver" />
+		<property name="jdbcUrl" value="jdbc:mysql:///AMS" />
+		<property name="user" value="root" />
+		<property name="password" value="104533" />
+		
+		<!--初始化时获取的连接数，取值应在minPoolSize与maxPoolSize之间。-->
+		<property name="initialPoolSize" value="1"/>
+		
+		<!--连接池中保留的最小连接数。-->
+		<property name="minPoolSize" value="1"/>
+		<!--连接池中保留的最大连接数。-->
+		<property name="maxPoolSize" value="300"/>
+		<!--最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。-->
+		<property name="maxIdleTime" value="60"/>
+		<!--当连接池中的连接耗尽的时候c3p0一次同时获取的连接数。-->
+		<property name="acquireIncrement" value="5"/>
+		<!--每60秒检查所有连接池中的空闲连接。Default: 0 -->
+		<property name="idleConnectionTestPeriod" value="60"/>
+	</bean>
+	
+	<!-- 添加sessionFactory bane，注意，该类是Spring提供的 -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+	    <!-- 把数据源 bean 注入到sessionFactory的dataSource属性 -->
+		<property name="dataSource" ref="dataSource"/>
+		    <!-- 引入映射文件，如果有多个可以继续添加 <value> -->
+			<property name="mappingResources">
+				<list>
+					<value>entity/User.hbm.xml</value>
+					<value>entity/Type.hbm.xml</value>
+					<value>entity/Department.hbm.xml</value>
+					<value>entity/Bsend.hbm.xml</value>
+					<value>entity/Assets.hbm.xml</value>
+					<value>entity/Admin.hbm.xml</value>
+				</list>
+			</property>
+			
+		    <!-- hibernate的基本配置，如:方言，是否显示sql,可以用于调试 -->
+			<property name="hibernateProperties">
+				<props>
+					<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+					<prop key="hibernate.hbm2ddl.auto">update</prop>
+					<prop key="hibernate.show_sql">false</prop>
+					<!-- <prop key="hibernate.show_sql">false</prop> -->
+				</props>
+			</property>
+	</bean>
+	
+	<!-- 配置事务管理TransactionManager的配置 -->  
+	<bean id="txManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	
+	<!-- 使用基于注解方式配置transaction -->
+	<tx:annotation-driven transaction-manager="txManager"/>	
+	
+	</beans>
+	
+	

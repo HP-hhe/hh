@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN" "http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+	<!-- 申明struts.objectFactory为Spring的对象池构建工厂;第二行为设置编码 -->
+	<constant name="struts.objectFactory" value="spring" />
+	<constant name="struts.i18n.encoding" value="UTF-8" />
+	
+	<!-- 设置访问路径 ，struts-default包是由struts内置的，它定义了struts2内部的众多拦截器和Result类型，
+			而Struts2很多核心的功能都是通过这些内置的拦截器实现，
+			如：从请求中把请求参数封装到action、文件上传和数据验证等等都是通过拦截器实现的。
+			当包继承了struts-default包才能使用struts2为我们提供的这些功能。，使用相对路径-->
+	<package name="hh" namespace="/" extends="struts-default">
+		<!--拦截器配置  -->
+		<interceptors>
+			<!--第一个为登录拦截器；第二个为权限拦截器  -->
+			<interceptor name ="checklogin" class ="interceptor.CheckLoginInterceptor" /> 
+			<interceptor name ="checkpermission" class ="interceptor.CheckPermissionInterceptor" />
+		  	<!-- 配置拦截器栈，Struts2 拦截器在访问某个 Action 方法之前或之后实施拦截，AOP的方式 -->
+		   	<interceptor-stack name="withchecklogin">
+           		<interceptor-ref name="checklogin"/>
+		   		<interceptor-ref name="defaultStack"/>
+		   	</interceptor-stack>
+		</interceptors>
+		
+		<!--默认拦截器  -->
+		<default-interceptor-ref name="withchecklogin"/>
+		
+		<!--全局result，找到对应的返回结果 -->
+		<global-results>
+			<result name="login">/index.jsp</result>
+			<result name="permission">/nopermission.jsp</result>
+			<result name="error">/error.jsp</result>
+		</global-results>
+		<global-exception-mappings>  
+   			<exception-mapping result="error" exception="java.lang.Exception"/>  
+  		</global-exception-mappings>
+  		
+		<!--定义一个action名称为get,实现类为GetName.java,下面其他的相同-->
+		<action name="get" class="getName" method="get" />
+		<action name="login" class="loginAction" method="login" />
+		<action name="exit" class="exit" method="exit" >
+			<!-- 退出的时候转到index.jsp页面 -->
+			<result name="login">/index.jsp</result>
+		</action>
+		<action name="changepass" class="changePassAction" method="change" />
+		<action name="getdepartment" class="getDepartment" method="get" />
+		<action name="gettype" class="getType" method="get" />
+		<action name="getuser" class="getUser" method="get" />
+		<action name="getnew" class="getNewAction" method="get" />
+		<action name="getbsend" class="getBsendAction" method="get" />
+		<action name="getasset" class="getAsset" method="get" />
+		<action name="changepersondetail" class="changePersonDetailAction" method="change" />
+		<action name="createuser" class="createUserAction" method="create" />
+		<action name="searchuser" class="searchUserAction" method="search" />
+		<action name="deleteuser" class="deleteUserAction" method="delete" />
+		<action name="deleteasset" class="deleteAssetAction" method="delete" />
+		<action name="alteruser" class="alterUserAction" method="alter" />
+		<action name="createadmin" class="createAdminAction" method="create">
+			<!-- 检查权限 --> 
+			<interceptor-ref name ="checkpermission" />
+			<interceptor-ref name="defaultStack"/>
+		</action>
+		<action name="searchadmin" class="searchAdminAction" method="search">
+			<!-- 检查权限 --> 
+			<interceptor-ref name ="checkpermission" />
+			<interceptor-ref name="defaultStack"/>
+		</action>
+		<action name="deleteadmin" class="deleteAdminAction" method="delete">
+			<!-- 检查权限 --> 
+			<interceptor-ref name ="checkpermission" />
+			<interceptor-ref name="defaultStack"/>
+		</action>
+		<action name="createdp" class="createDepartmentAction" method="create" />
+		<action name="searchdp" class="searchDepartmentAction" method="search" />
+		<action name="deletedp" class="deleteDepartmentAction" method="delete" />
+		<action name="alterdp" class="alterDepartmentAction" method="alter" />
+		<action name="createtype" class="createTypeAction" method="create" />
+		<action name="searchtype" class="searchTypeAction" method="search" />
+		<action name="deletetype" class="deleteTypeAction" method="delete" />
+		<action name="altertype" class="alterTypeAction" method="alter" />
+		<action name="createasset" class="createAssetAction" method="create" />
+		<action name="searchasset" class="searchAssetAction" method="search" />
+		<action name="alterasset" class="alterAssetAction" method="alter" />
+		<action name="sxasset" class="createBsendAction" method="create" />
+		<action name="sxwb" class="sxwbAction" method="sxwb" />
+		<action name="statistics" class="statisticsAction" method="search" />
+	</package>
+</struts>
